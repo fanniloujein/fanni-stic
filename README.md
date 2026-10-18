@@ -65,6 +65,7 @@ Au premier affichage, les 9 services, leurs filtres (traduits) et 7 questions de
 | `npm run test:e2e` | Parcours complets dans un navigateur (voir [Tests](#tests)) |
 | `npm run typecheck` / `npm run lint` | Vérifications TypeScript / ESLint |
 | `npm run admin:create -- email motdepasse` | Crée ou réinitialise un administrateur |
+| `npm run db:check` | Applique les migrations et explique l’erreur éventuelle |
 | `npm run db:studio` | Explorateur de base Prisma |
 
 ---
@@ -109,6 +110,22 @@ L’application est un serveur Next.js classique + PostgreSQL. Les fichiers (pi�
 **Vercel** : possible avec une base hébergée (Neon, Supabase) ; lancer `npm run db:deploy` et `npm run bootstrap` une fois depuis votre poste avec la `DATABASE_URL` de production. Les envois de fichiers sont alors limités à ~4,5 Mo par requête par la plateforme.
 
 ---
+
+### Base non synchronisée avec le site
+
+Ouvrez **`https://votre-site/api/health`** : la page indique si la base est joignable, si les tables existent, quelles migrations sont appliquées, et s’il existe un administrateur — avec la marche à suivre en cas de problème. Elle affiche aussi un extrait de l’adresse de la base utilisée, pour vérifier que le site pointe bien vers **la même base** que celle que vous consultez.
+
+Causes fréquentes :
+
+| Symptôme | Solution |
+|---|---|
+| « Les tables n’existent pas encore » | La commande de démarrage doit être **`npm start`** (elle applique les migrations). Sur Render : *Settings → Start Command*. Ou, depuis votre poste avec l’URL externe : `DATABASE_URL="…" npm run db:check`. |
+| « Connexion à la base impossible » | `DATABASE_URL` erronée. Sur Render, l’*Internal URL* ne marche que si le site est dans la **même région** que la base ; sinon utilisez l’*External URL*. Neon/Supabase : gardez `?sslmode=require`. |
+| Les données saisies n’apparaissent pas | Le site et vous utilisez deux bases différentes (ex. une base locale et une base en ligne) : comparez l’hôte affiché par `/api/health` avec celui de votre outil. |
+| « Une migration a échoué » | `npx prisma migrate resolve --rolled-back <nom>` puis redéployez (avec la `DATABASE_URL` de production). |
+| « Aucun administrateur » | Ajoutez `ADMIN_EMAIL` et `ADMIN_PASSWORD` (12 caractères min.) puis redémarrez, ou `npm run admin:create -- email motdepasse`. |
+
+Les migrations sont appliquées au build (sans bloquer si la base n’est pas encore accessible) **et** à chaque démarrage : une base vide est donc créée automatiquement.
 
 ## Ce qui reste à connecter
 
