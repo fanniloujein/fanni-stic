@@ -127,7 +127,7 @@ L’application est un serveur Next.js classique + PostgreSQL. Les fichiers (pi�
 ## Architecture
 
 ```
-fannistic/
+fanni-stic/
 ├── prisma/schema.prisma        # Modèle de données (demandes, devis, messages, fichiers, services, portfolio, FAQ, réglages)
 ├── scripts/                    # create-admin, bootstrap (démarrage), e2e (Playwright)
 ├── src/
